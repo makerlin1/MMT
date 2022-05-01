@@ -1,0 +1,19 @@
+ops: None
+torch.nn:
+    Conv1d:
+        in_channels: [8, 16, 32]
+        out_channels: [16, 32, 64]
+        kernel_size: [3, 5, 7]
+        stride: [1, 2]
+        padding: [1, 2]
+        input_shape: [[1, 8, 16], [1, 16, 16], [1, 32, 16]]  # 注意长度
+    ReLU: None
+    Sigmoid: None
+    Linear:
+        in_features: [8, 16]
+        out_features: [16, 32]
+        input_shape: [[1, 8], [1, 16]]
+
+
+
+
