@@ -120,6 +120,7 @@ def convert2mnn(ops, path, verbose=False):
     torch.onnx.export(model, dummy_input, onnx_name, verbose=verbose, input_names=input_names,
                       output_names=output_names)
     logger.info("Export %s to %s" % (name, onnx_name))
+    # todo: 使用C++版工具转换
     cmd = "mnnconvert -f ONNX --modelFile {} --MNNModel {} --bizCode biz".format(onnx_name, mnn_name)
     os.system(cmd)
     if not os.path.isfile(mnn_name):
