@@ -34,8 +34,18 @@ def meter_ops(fp, times=30):
         path = os.path.join(fp, meta.mnn_fname)
         result = get_latency(path, times=times)
         meta.record_mnn_performance(result)
-    update_meta_path = os.path.join(fp, "meta_lantency.pkl")
+    update_meta_path = os.path.join(fp, "meta_latency.pkl")
     with open(update_meta_path, "wb") as f:
         pickle.dump(meta_list, f)
     logger.info("Finish!")
 
+
+def get_model_latency(model, input_shape, path="."):
+    if len(model.__repr__()) > 50:
+        logger.warn("please rewrite the model.__repr__()")
+    from .converter import convert2mnn
+    mnn_name = convert2mnn(model, input_shape, path, verbose=False)
+    path = os.path.join(path, mnn_name)
+    result = get_latency(path, times=30)
+    os.remove(path)
+    return result

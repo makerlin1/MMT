@@ -6,6 +6,8 @@ File:     utils.py
 """
 import importlib
 import copy
+import pickle
+import tabulate
 
 
 class ops_meta:
@@ -17,15 +19,18 @@ class ops_meta:
         self.avg = 0
         self.max = 0
         self.min = 0
+        self.repr = ""
 
     def __repr__(self):
-        return "%s-[%s]-%s" % (self.classname, shape2str(self.input_shape), self.mnn_fname)
+        return self.repr
 
     def return_instance(self):
         if self.init_param:
-            return self.classname(**self.init_param)
+            model = self.classname(**self.init_param)
         else:
-            return self.classname()
+            model = self.classname()
+        self.repr = model.__repr__()
+        return model
 
     def record_mnn_fname(self, fname):
         self.mnn_fname = fname
@@ -83,4 +88,14 @@ def remove_(str):
 def replace(str):
     str = str.replace("(", "-").replace(")", "-").replace(",", "-").replace(" ", "")
     return remove_(str)
+
+
+def parse_ops_info(path):
+    ops_info_list = []
+    with open(path, "rb") as f:
+        ops_list = pickle.load(f)
+        for ops in ops_list:
+            ops_info_list.append((ops.classname, ops.input_shape, ops.avg, ops.min, ops.max, ops.repr))
+    return ops_info_list
+
 

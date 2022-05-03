@@ -15,6 +15,26 @@ pip install cmake
 **注意：一定要将build文件夹添加到环境变量！**
 
 ## 2.快速开始 Quickly Start
+### 2.1 修改您的模型
+对于您自定义的模型，请改写__repr__(),并且要具有参数的唯一表示性，例如：
+```python
+    def __init__(self, ...)
+     self.name = "ResNetBasicBlock-%d-%d-%d-%d-" % (in_channels, out_channels, stride, kernel)
+    ...
+    def __repr__(self):
+        return self.name
+```
+如果**对于不同参数输入的同类型算子，"\_\_repr\_\_()"返回的结果不能具有区分性,则非常容易造成运行错误或测量误差！**
+例如对于demo中的ResNet18:
+```
+ResNetBasicBlock-64-64-1-3-                                           
+ResNetBasicBlock-64-64-1-7-  
+...
+```
+这两个算子都属于ResNetBasicBlock类，但输入参数不同，算子的实际延迟是不同的，因此__repr__()必须要具有算子唯一性。
+
+
+
 1.编写算子描述文件
 ```yaml
 resnet18:

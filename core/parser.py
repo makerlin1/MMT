@@ -4,40 +4,61 @@ Time:     2022-05-02 13:20
 Author:   Haolin Yan(XiDian University)
 File:     parser.py
 """
-from .utils import import_module, generate_param_list, ops_meta
+from .utils import import_module, generate_param_list, ops_meta, parse_ops_info
 import yaml
+from tabulate import tabulate
+import logging
+import torch
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-# todo: 解析模型不仅需要解析类名同时还有输入的张量尺寸
-def parser_model(module, ops_list, verbose=False):
-    """
-    Parse the operators in the model and return the corresponding dictionary
-    e.g.
-        ops_list = [MLP, nn.Linear, nn.ReLU]  # MLP is designed module by yourself
-        arch2ops = parser_model(model, ops_list, verbose=True)
-    """
-    arch2ops = {}
+def predict_latency(module, ops_path, input_shape, verbose=False):
+    headers = ["ops", "input_shape", "output_shape", "Avg latency(ms)"]
+    ops_list = parse_ops_info(ops_path)
+    result = []
+    latency_all = [0]
 
-    def get_input_shape(ops, input):
-        pass
+    def get_input_shape(m, in_f, out_f):
+        input_shape = list(in_f[0].shape)
+        found = False
+        for ops in ops_list:
+            if isinstance(m, ops[0]) and input_shape == ops[1] and m.__repr__() == ops[-1]:
+                result.append([ops[-1], ops[1], list(out_f.shape), ops[2]])
+                latency_all[0] += ops[2]
+                found = True
+                break
+
+        if not found:
+            logger.warning("No matching operator is found, check whether the input format of the defined operator is "
+                           "consistent with that in the operator description file")
+            logger.warning("ops: %s \n ops_list:" % m.__repr__())
+            for ops in ops_list:
+                print(ops[-1])
 
     def search_ops(module, ops_list):
         for name, m in module.named_children():
             found = False
             for ops in ops_list:
-                if isinstance(m, ops):
+                if isinstance(m, ops[0]):
                     if verbose:
-                        print("{} belongs to {}".format(name, ops.__name__))
-                    found = True
-                    arch2ops[name] = ops.__name__
-                    m.__name__ = name
+                        print("{} belongs to {}".format(name, ops[0].__name__))
                     m.register_forward_hook(get_input_shape)
+                    m.__name__ = name
+                    found = True
                     break
             if not found:
                 search_ops(m, ops_list)
+        return module
 
-    search_ops(module, ops_list)
-    return arch2ops
+    module = search_ops(module, ops_list)
+    x = torch.ones(input_shape)
+    _ = module(x)
+    result.append(("Sum", "-", "-", latency_all[0]))
+    if verbose:
+        print(tabulate(result, headers=headers))
+    return latency_all[0]
 
 
 def parse_yaml(path):

@@ -67,7 +67,7 @@ class ResNet18(nn.Module):
         self.layer4 = nn.Sequential(ResNetDownBlock(256, 512, [2, 1], kernel=kernel_list[6]),
                                     ResNetBasicBlock(512, 512, 1, kernel=kernel_list[7])) # 512,14,14
 
-        self.avgpool = nn.AdaptiveAvgPool2d(output_size=(1, 1))# 512,14,14
+        self.avgpool = nn.AdaptiveAvgPool2d(output_size=[1, 1])# 512,14,14
 
         self.fc = nn.Linear(512, 10) # (512)
 
@@ -82,6 +82,8 @@ class ResNet18(nn.Module):
         out = self.fc(out)
         return out
 
+    def __repr__(self):
+        return "ResNet18"
 
 
 if __name__ == "__main__":
