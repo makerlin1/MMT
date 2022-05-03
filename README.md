@@ -1,9 +1,8 @@
-MMT: Mnn MeTer
----
+![img.png](img.png)
+## Intro
 基于MNN+pytorch框架的模型延迟预测工具
 ## 1.安装
 先完成MNN编译，以及pytorch等依赖
-
 ### 1.1 MNN 安装
 1.cmake
 ```
