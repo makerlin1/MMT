@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_latency(path, times=30):
+    """Test the latency of operator with the given path"""
     cmd = "MNNV2Basic.out %s %d 0 0 4 > %s" % (path, times, path + '.log')
     os.system(cmd)
     with open(path + '.log', 'r') as f:
@@ -26,6 +27,7 @@ def get_latency(path, times=30):
 
 
 def meter_ops(fp, times=30):
+    """Test the latency of operators in the input folder, and write the result in meta_latency.pkl"""
     logger.info("Begin to measure!")
     meta_path = os.path.join(fp, "meta.pkl")
     with open(meta_path, "rb") as f:
@@ -41,6 +43,9 @@ def meter_ops(fp, times=30):
 
 
 def get_model_latency(model, input_shape, path="."):
+    """
+    Convert pytorch model to mnn format and test its latency
+    """
     if len(model.__repr__()) > 50:
         logger.warn("please rewrite the model.__repr__()")
     from .converter import convert2mnn

@@ -4,7 +4,11 @@ Time:     2022-05-02 13:20
 Author:   Haolin Yan(XiDian University)
 File:     parser.py
 """
-from .utils import import_module, generate_param_list, ops_meta, parse_ops_info
+from .utils import (import_module,
+                    generate_param_list,
+                    ops_meta,
+                    parse_ops_info,
+                    get_net_device)
 import yaml
 from tabulate import tabulate
 import logging
@@ -15,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def predict_latency(module, ops_path, input_shape, verbose=False):
+    """Predict the model's latency using the latency table"""
     headers = ["ops", "input_shape", "output_shape", "Avg latency(ms)"]
     ops_list = parse_ops_info(ops_path)
     result = []
@@ -53,7 +58,9 @@ def predict_latency(module, ops_path, input_shape, verbose=False):
         return module
 
     module = search_ops(module, ops_list)
-    x = torch.ones(input_shape)
+    device = get_net_device(module)
+    module.eval()
+    x = torch.ones(input_shape).to(device)
     _ = module(x)
     result.append(("Sum", "-", "-", latency_all[0]))
     if verbose:

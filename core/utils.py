@@ -7,7 +7,6 @@ File:     utils.py
 import importlib
 import copy
 import pickle
-import tabulate
 
 
 class ops_meta:
@@ -99,3 +98,5 @@ def parse_ops_info(path):
     return ops_info_list
 
 
+def get_net_device(model):
+    return next(model.parameters()).device

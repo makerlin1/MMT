@@ -19,7 +19,7 @@ from core.meter import get_model_latency
 
 def generate_different_cfg():
     configs = []
-    kernel = [3, 5]
+    kernel = [3, 5, 7]
     cfg = [0] * 8
 
     def fill_(cfg, index):
@@ -37,16 +37,20 @@ def generate_different_cfg():
 
 configs = generate_different_cfg()
 path = "ops_resnet18/meta_latency.pkl"
-pred = []
-true = []
-
+error = []
 for i, c in enumerate(configs):
     model = ResNet18(c)
-    pred.append(predict_latency(model, path, [1, 3, 224, 224], verbose=False))
-    true.append(get_model_latency(model, [1, 3, 224, 224])["Avg"])
-    print("(%d/%d) pred: %f true: %f" % (i, len(configs), pred[i], true[i]))
-
-pd.DataFrame({"pred": pred, "true": true}).to_csv("check_result.csv", index=False)
+    p = -1000
+    t = 1000
+    max_repeat = 0
+    while abs(p - t) / t > 0.10 and max_repeat < 5:
+        p = predict_latency(model, path, [1, 3, 224, 224], verbose=False)
+        t = get_model_latency(model, [1, 3, 224, 224])["Avg"]
+        max_repeat += 1
+    err = abs(p - t) / t
+    print("Error rate: {}%".format(err * 100))
+    error.append(err)
+pd.DataFrame({"error": error}).to_csv("check_result.csv", index=False)
 
 
 
