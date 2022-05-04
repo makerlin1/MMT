@@ -69,8 +69,10 @@ torch.nn:
 ```
 [Refer to how to describe your operator](docs/configuration.md)
 ### 2.3 Create a list of operators and export the operators to mnn format
+
 ```python
-from core.converter import generate_ops_list
+from mmt.converter import generate_ops_list
+
 generate_ops_list("ops.yaml", "/path/ops_folder")
 ```
 `ops.yaml` is the operator description file, 
@@ -80,8 +82,10 @@ the operator is saved, and the corresponding
 to save the metadata information of the operator.
 
 ### 2.4 Record operator delays on the deployment side, and build an operator latency table
+
 ```python
-from core.meter import meter_ops
+from mmt.meter import meter_ops
+
 meter_ops("./ops", times=100)
 ```
 `ops` is the folder where the operator and `meta.pkl` are saved, 
@@ -93,8 +97,10 @@ specifically records the metadata and corresponding
 latency of all operators.
 
 ### 2.5 Predicting model latency on the server side
+
 ```python
-from core.parser import predict_latency
+from mmt.parser import predict_latency
+
 ...
 model = ResNet18()
 pred_latency = predict_latency(model, path, [1, 3, 224, 224], verbose=False)

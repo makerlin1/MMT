@@ -7,8 +7,8 @@ File:     main.py.py
 import sys
 sys.path.append("/tmp/pycharm_project_937")
 # Convert
-from core.converter import generate_ops_list
+from mmt.converter import generate_ops_list
 generate_ops_list("resnet18.yaml", "ops_resnet18")
 # Measure
-from core.meter import meter_ops
+from mmt.meter import meter_ops
 meter_ops("ops_resnet18", times=100)

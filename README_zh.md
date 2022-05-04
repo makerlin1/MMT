@@ -57,16 +57,20 @@ torch.nn:
 ```
 [参考如何描述您的算子](docs/configuration_zh.md)
 ### 2.3 创建算子列表，将算子导出为mnn格式
+
 ```python
-from core.converter import generate_ops_list
+from mmt.converter import generate_ops_list
+
 generate_ops_list("ops.yaml", "/path/ops_folder")
 ```
 其中`ops.yaml`为算子描述文件，`/path/ops_folder`是保存算子的目录，在
 该目录下会生成对应的`meta.pkl`保存有算子的元数据信息。
 
 ### 2.4 在部署端记录算子的延迟，构建算子延迟表
+
 ```python
-from core.meter import meter_ops
+from mmt.meter import meter_ops
+
 meter_ops("./ops", times=100)
 ```
 `ops`为保存算子与`meta.pkl`的文件夹，`times`表示重复测试次数，运行改程序，
@@ -74,8 +78,10 @@ meter_ops("./ops", times=100)
 元数据与对应延迟。
 
 ### 2.5 在服务器端预测模型延迟
+
 ```python
-from core.parser import predict_latency
+from mmt.parser import predict_latency
+
 ...
 model = ResNet18()
 pred_latency = predict_latency(model, path, [1, 3, 224, 224], verbose=False)

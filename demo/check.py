@@ -13,8 +13,8 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 sys.path.append("/tmp/pycharm_project_937")
-from core.parser import predict_latency
-from core.meter import get_model_latency
+from mmt.parser import predict_latency
+from mmt.meter import get_model_latency
 
 
 def generate_different_cfg():
