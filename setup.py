@@ -5,7 +5,6 @@ Author:   Haolin Yan(XiDian University)
 File:     setup.py.py
 """
 from setuptools import setup, find_packages
-from mmt import __author__, __version__
 
 # read the contents of your README file
 from os import path
@@ -16,8 +15,8 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 setup(
     name='mnn-meter',
     include_package_data=True,
-    version=__version__,
-    author=__author__,
+    version="1.0.1",
+    author="Haolin Yan",
     author_email='haolinyan_xdu@163.com',
     description="Tools for quickly building operator latency tables and for accurately predicting model latency (based on Pytorch and MNN)",
     long_description=long_description,
@@ -37,5 +36,5 @@ setup(
     ],
     project_urls={
         'Source': 'https://github.com/makerlin1/MMT',
-    },
+    }
 )

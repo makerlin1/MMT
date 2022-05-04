@@ -90,9 +90,16 @@ pred_latency = predict_latency(model, path, [1, 3, 224, 224], verbose=False)
 中设置的`input_shape`相同。
 
 ## 3 检验MMT的预测误差
-To do
+|Model|Num|err(%)|device|
+|----|----|----|----|
+|ResNet|6561|2.6%(3%)|  40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
+|
 
-### 开发日志
+### 开发日志 & 计划
 * 2022.5.1 框架设计
 * 2022.5.2 完成算子生成与测算
 * 2022.5.3 完成模型预测与检验, 完善代码介绍
+* 2022.5.4 上线pypi
+* 提供一些辅助编写算子描述文件的工具
+* 增加memory,MB测算支持
+* 

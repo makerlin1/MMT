@@ -93,3 +93,37 @@ def parse_yaml(path):
                 del cfg["input_shape"]
                 ops_register.append(ops_meta(getattr(pkg, ops), input_shape, init_param=cfg))
     return ops_register
+
+
+def summary_model(model, input_size, ops_list, verbose=False):
+    ops_input_shape = []
+    headers = ["ops", "input_shape", "out_shape"]
+
+    def get_input_shape(m, in_f, out_f):
+        for ops in ops_list:
+            if isinstance(m, ops):
+                ops_input_shape.append([m.__repr__(), list(in_f[0].shape), list(out_f.shape)])
+                break
+
+    def search_ops(module, ops_list):
+        for name, m in module.named_children():
+            found = False
+            for ops in ops_list:
+                if isinstance(m, ops):
+                    if verbose:
+                        print("{} belongs to {}".format(name, ops.__name__))
+                    m.register_forward_hook(get_input_shape)
+                    m.__name__ = name
+                    found = True
+                    break
+            if not found:
+                search_ops(m, ops_list)
+        return module
+
+    module = search_ops(model, ops_list)
+    device = get_net_device(module)
+    module.eval()
+    x = torch.ones(input_size).to(device)
+    _ = module(x)
+    print(tabulate(ops_input_shape, headers=headers))
+
