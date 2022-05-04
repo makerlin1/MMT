@@ -43,7 +43,7 @@ def meter_ops(fp, times=30):
     logger.info("Finish!")
 
 
-def get_model_latency(model, input_shape, path="."):
+def get_model_latency(model, input_shape, path=".", times=30):
     """
     Convert pytorch model to mnn format and test its latency
     """
@@ -52,6 +52,6 @@ def get_model_latency(model, input_shape, path="."):
     from .converter import convert2mnn
     mnn_name = convert2mnn(model, input_shape, path, verbose=False)
     path = os.path.join(path, mnn_name)
-    result = get_latency(path, times=30)
+    result = get_latency(path, times=times)
     os.remove(path)
     return result

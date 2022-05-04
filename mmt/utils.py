@@ -7,6 +7,9 @@ File:     utils.py
 import importlib
 import copy
 import pickle
+import os
+import json
+from .meter import get_latency
 
 
 class ops_meta:
@@ -53,23 +56,26 @@ def shape2str(shape):
 
 def generate_param_list(kwargs):
     cfg_list = []
+    index = 0
+    key_list = list(kwargs.keys())
 
-    def generate_param(param, **kwargs):
-        for i, (k, v) in enumerate(param.items()):
-            if v or k == "input_shape":
-                continue
-            table = kwargs[k]
-            for j, ele in enumerate(table):
-                param[k] = ele
-                param_ = copy.deepcopy(param)
-                if i == 0:
-                    param_["input_shape"] = kwargs["input_shape"][j]
-                generate_param(param_, **kwargs)
+    def generate_param(param, index, **kwargs):
+        # print(param, index)
+        key = key_list[index]
+        if key == "input_shape":
+            cfg_list.append(param)
             return 0
-        cfg_list.append(param)
+
+        table = kwargs[key]
+        for j, ele in enumerate(table):
+            param[key] = ele
+            param_ = copy.deepcopy(param)
+            if index == 0:
+                param_["input_shape"] = kwargs["input_shape"][j]
+            generate_param(param_, index + 1, **kwargs)
 
     param = dict((n, None) for n in kwargs.keys())
-    generate_param(param, **kwargs)
+    generate_param(param, index, **kwargs)
     return cfg_list
 
 
@@ -100,3 +106,20 @@ def parse_ops_info(path):
 
 def get_net_device(model):
     return next(model.parameters()).device
+
+
+def export_models_list(model, input_shape, path, **kwargs):
+    from .converter import convert2mnn
+    net = model(**kwargs)
+    convert2mnn(net, input_shape, path)
+    kwargs["fname"] = path
+    with open(os.path.join(path, "meta.json"), "w") as f:
+        json.dump(kwargs, f)
+
+
+
+
+
+
+
+

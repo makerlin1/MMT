@@ -89,7 +89,79 @@ pred_latency = predict_latency(model, path, [1, 3, 224, 224], verbose=False)
 `path`为对应`meta_latency.pkl`的路径，注意输入的张量形状必须与之前在算子描述
 中设置的`input_shape`相同。
 
-## 3 检验MMT的预测误差
+## 3 如何检验MMT的预测误差
+### 3.1 根据定义的算子描述空间生成算子列表
+```python
+from mmt.converter import generate_ops_list
+
+generate_ops_list("ops.yaml", "/path/ops_folder")
+```
+### 3.2 准备不同配置的模型
+`mmt`提供如下工具将pytorch模型直接转为`mnn`格式：
+```python
+from mmt.converter import convert2mnn
+convert2mnn(model, [1, 3, 224, 224], save_path)
+```
+`mmt`提供如下工具在推理端测试`mnn`格式文件的延迟
+```python
+from mmt.meter import get_latency
+latency = get_latency(path, times=30)
+```
+为了方便快速测试多个模型，`mmt`提供更方便的方式进行测算与检验。
+* 使用如下方式将模型导出为模型列表。
+
+```python
+net = MobileNetV3(cfgs, mode='small')
+ops_list = [nn.Linear, nn.Dropout, conv_3x3_bn, InvertedResidual, conv_1x1_bn, h_swish]
+summary_model(net, [1, 3, 224, 224], ops_list)
+>>>
+ops                                                     input_shape        out_shape
+------------------------------------------------------  -----------------  -----------------
+conv_3x3_bn-3-16-2                                      [1, 3, 224, 224]   [1, 16, 112, 112]
+InvertedResidual-16-16-16-3-2-1-0                       [1, 16, 112, 112]  [1, 16, 56, 56]
+InvertedResidual-16-72-24-3-2-0-0                       [1, 16, 56, 56]    [1, 24, 28, 28]
+InvertedResidual-24-88-24-3-1-0-0                       [1, 24, 28, 28]    [1, 24, 28, 28]
+InvertedResidual-24-96-40-5-2-1-1                       [1, 24, 28, 28]    [1, 40, 14, 14]
+InvertedResidual-40-240-40-5-1-1-1                      [1, 40, 14, 14]    [1, 40, 14, 14]
+InvertedResidual-40-240-40-5-1-1-1                      [1, 40, 14, 14]    [1, 40, 14, 14]
+InvertedResidual-40-120-48-5-1-1-1                      [1, 40, 14, 14]    [1, 48, 14, 14]
+InvertedResidual-48-144-48-5-1-1-1                      [1, 48, 14, 14]    [1, 48, 14, 14]
+InvertedResidual-48-288-96-5-2-1-1                      [1, 48, 14, 14]    [1, 96, 7, 7]
+InvertedResidual-96-576-96-5-1-1-1                      [1, 96, 7, 7]      [1, 96, 7, 7]
+InvertedResidual-96-576-96-5-1-1-1                      [1, 96, 7, 7]      [1, 96, 7, 7]
+conv_1x1_bn-96-576                                      [1, 96, 7, 7]      [1, 576, 7, 7]
+Linear(in_features=576, out_features=1024, bias=True)   [1, 576]           [1, 1024]
+h_swish                                                 [1, 1024]          [1, 1024]
+Dropout(p=0.2, inplace=False)                           [1, 1024]          [1, 1024]
+Linear(in_features=1024, out_features=1000, bias=True)  [1, 1024]          [1, 1000]
+MobileNetV3(
+  (features): Sequential(
+    (0): conv_3x3_bn-3-16-2
+    (1): InvertedResidual-16-16-16-3-2-1-0
+    (2): InvertedResidual-16-72-24-3-2-0-0
+    (3): InvertedResidual-24-88-24-3-1-0-0
+    (4): InvertedResidual-24-96-40-5-2-1-1
+    (5): InvertedResidual-40-240-40-5-1-1-1
+    (6): InvertedResidual-40-240-40-5-1-1-1
+    (7): InvertedResidual-40-120-48-5-1-1-1
+    (8): InvertedResidual-48-144-48-5-1-1-1
+    (9): InvertedResidual-48-288-96-5-2-1-1
+    (10): InvertedResidual-96-576-96-5-1-1-1
+    (11): InvertedResidual-96-576-96-5-1-1-1
+  )
+  (conv): conv_1x1_bn-96-576
+  (avgpool): AdaptiveAvgPool2d(output_size=(1, 1))
+  (classifier): Sequential(
+    (0): Linear(in_features=576, out_features=1024, bias=True)
+    (1): h_swish
+    (2): Dropout(p=0.2, inplace=False)
+    (3): Linear(in_features=1024, out_features=1000, bias=True)
+  )
+)
+```
+
+
+
 |Model|Num|err(%)|device|
 |----|----|----|----|
 |ResNet|6561|2.6%(3%)|  40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
