@@ -68,6 +68,21 @@ def predict_latency(module, ops_path, input_shape, verbose=False):
     return latency_all[0]
 
 
+def parse_kargs(module, param):
+    ops_register = []
+    if param.get("no_params", False):
+        for in_shape in param["input_shape"]:
+            ops_register.append(ops_meta(module, in_shape))
+        return ops_register
+
+    cfg_list = generate_param_list(param)
+    for cfg in cfg_list:
+        input_shape = cfg["input_shape"]
+        del cfg["input_shape"]
+        ops_register.append(ops_meta(module, input_shape, init_param=cfg))
+    return ops_register
+
+
 def parse_yaml(path):
     """
     Parse the YAML file and return all operators(a list of class)
@@ -126,4 +141,3 @@ def summary_model(model, input_size, ops_list, verbose=False):
     x = torch.ones(input_size).to(device)
     _ = module(x)
     print(tabulate(ops_input_shape, headers=headers))
-

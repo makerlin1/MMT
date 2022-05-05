@@ -108,7 +108,7 @@ def get_net_device(model):
     return next(model.parameters()).device
 
 
-def export_models_list(model, input_shape, path, **kwargs):
+def export_models(model, input_shape, path, **kwargs):
     from .converter import convert2mnn
     net = model(**kwargs)
     convert2mnn(net, input_shape, path)

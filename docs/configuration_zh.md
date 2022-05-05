@@ -92,3 +92,36 @@ resnet18:
         kernel: [3, 5, 7]
         input_shape: [[1, 64, 112, 112], [1, 128, 56, 56], [1, 256, 28, 28]]
 ```
+
+### 其他一些辅助技巧
+可以使用`summary_model`函数快速了解您的模型不同层的输入形状以快速选择模型的`input_shape`。
+```python
+...
+from mmt.parser import summary_model
+net = MobileNetV3(cfgs, mode='small')
+ops_list = [nn.Linear, nn.Dropout, conv_3x3_bn, InvertedResidual, conv_1x1_bn, h_swish]
+summary_model(net, [1, 3, 224, 224], ops_list)
+print(net)
+>>>
+ops                                                     input_shape        out_shape
+------------------------------------------------------  -----------------  -----------------
+conv_3x3_bn-3-16-2                                      [1, 3, 224, 224]   [1, 16, 112, 112]
+InvertedResidual-16-16-16-3-2-1-0                       [1, 16, 112, 112]  [1, 16, 56, 56]
+InvertedResidual-16-72-24-3-2-0-0                       [1, 16, 56, 56]    [1, 24, 28, 28]
+InvertedResidual-24-88-24-3-1-0-0                       [1, 24, 28, 28]    [1, 24, 28, 28]
+InvertedResidual-24-96-40-5-2-1-1                       [1, 24, 28, 28]    [1, 40, 14, 14]
+InvertedResidual-40-240-40-5-1-1-1                      [1, 40, 14, 14]    [1, 40, 14, 14]
+InvertedResidual-40-240-40-5-1-1-1                      [1, 40, 14, 14]    [1, 40, 14, 14]
+InvertedResidual-40-120-48-5-1-1-1                      [1, 40, 14, 14]    [1, 48, 14, 14]
+InvertedResidual-48-144-48-5-1-1-1                      [1, 48, 14, 14]    [1, 48, 14, 14]
+InvertedResidual-48-288-96-5-2-1-1                      [1, 48, 14, 14]    [1, 96, 7, 7]
+InvertedResidual-96-576-96-5-1-1-1                      [1, 96, 7, 7]      [1, 96, 7, 7]
+InvertedResidual-96-576-96-5-1-1-1                      [1, 96, 7, 7]      [1, 96, 7, 7]
+conv_1x1_bn-96-576                                      [1, 96, 7, 7]      [1, 576, 7, 7]
+Linear(in_features=576, out_features=1024, bias=True)   [1, 576]           [1, 1024]
+h_swish                                                 [1, 1024]          [1, 1024]
+Dropout(p=0.2, inplace=False)                           [1, 1024]          [1, 1024]
+Linear(in_features=1024, out_features=1000, bias=True)  [1, 1024]          [1, 1000]
+```
+
+
