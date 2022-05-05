@@ -123,8 +123,10 @@ def validation(fp, ops_path, verbose=False, save_path=None):
             data.append([torch_name, latency_t, latency_p, latency_p - latency_t])
     print(tabulate(data, headers))
     if save_path is not None:
-        with open(save_path, 'w') as f:
-            f.write(tabulate(data, headers))
+        import pandas as pd
+        import numpy as np
+        data = np.array(data)
+        pd.DataFrame({"model": data[:, 0], "latency_true(ms)": data[:, 1], "latency_pred(ms)": data[:, 2]}).to_csv(save_path)
 
 
 

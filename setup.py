@@ -33,6 +33,8 @@ setup(
     install_requires=[
         "tabulate",
         "pyyaml",
+        "pandas",
+        "numpy"
     ],
     project_urls={
         'Source': 'https://github.com/makerlin1/MMT',
