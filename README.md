@@ -147,5 +147,5 @@ Specific reference [MobileNetV3 test](demo/MobileNetV3/tutorial.md)
 
 |Model|Num|err(%)|device|
 |----|----|----|----|
-|ResNet|6561|2.6%(3%)|  40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
-|
+|ResNet|6561|2.6%|  40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz|
+|MobileNet|200|4.3%*| 40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz|
