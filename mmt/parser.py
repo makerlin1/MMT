@@ -61,11 +61,14 @@ def predict_latency(module, ops_path, input_shape, verbose=False):
     device = get_net_device(module)
     module.eval()
     x = torch.ones(input_shape).to(device)
+    if check_emb(module):
+        x = x.long()
     _ = module(x)
     result.append(("Sum", "-", "-", latency_all[0]))
     if verbose:
         print(tabulate(result, headers=headers))
     return latency_all[0]
+
 
 
 def parse_kargs(module, param):
@@ -139,5 +142,16 @@ def summary_model(model, input_size, ops_list, verbose=False):
     device = get_net_device(module)
     module.eval()
     x = torch.ones(input_size).to(device)
+    if check_emb(module):
+        x = x.long()
     _ = module(x)
     print(tabulate(ops_input_shape, headers=headers))
+
+
+def check_emb(model):
+    is_emb = False
+    for m in model.modules():
+        is_emb = isinstance(m, torch.nn.Embedding)
+        if is_emb:
+            return is_emb
+    return is_emb

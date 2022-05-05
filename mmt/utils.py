@@ -11,7 +11,6 @@ import os
 import json
 from .meter import get_latency
 
-
 class ops_meta:
     def __init__(self, classesname, input_shape, init_param=None):
         self.classname = classesname
@@ -115,6 +114,8 @@ def export_models(model, input_shape, path, **kwargs):
     kwargs["fname"] = path
     with open(os.path.join(path, "meta.json"), "w") as f:
         json.dump(kwargs, f)
+
+
 
 
 

@@ -15,11 +15,12 @@ import torch
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def convert2mnn(model, input_shape, path, verbose=False):
     """Convert pytorch model to mnn format."""
     model.eval().cuda()
     dummy_input = torch.randn(input_shape, device='cuda')
+    if check_emb(model):
+        dummy_input = torch.ones(input_shape, device='cuda').long()
     input_names = ["input"]
     output_names = ["output"]
     assert isinstance(input_shape, list), "Invalid input_shape: {}".format(input_shape)
@@ -42,7 +43,7 @@ def convert2mnn(model, input_shape, path, verbose=False):
     return os.path.basename(mnn_name)
 
 
-def generate_ops_list(path, fp):
+def generate_ops_list(path, fp, verbose=False):
     """
     Generate operators in mnn format according to the specified YAML file.
     """
@@ -54,7 +55,7 @@ def generate_ops_list(path, fp):
     success_ops = []
     for i, ops in enumerate(operator_list):
         module, input_shape = ops.return_instance(), ops.input_shape
-        mnn_name = convert2mnn(module, input_shape, fp, verbose=False)
+        mnn_name = convert2mnn(module, input_shape, fp, verbose=verbose)
         if mnn_name != 0:
             ops.record_mnn_fname(mnn_name)
             success_ops.append(ops)
@@ -94,11 +95,11 @@ def export_models(net, input_shape, fp, verbose=False):
     if not os.path.isdir(fp):
         os.mkdir(fp)
         logger.info("Create %s" % fp)
-    torch_path = os.path.join(fp, net.__repr__()+'.pth')
+    torch_path = os.path.join(fp, net.__repr__() + '.pth')
     torch.save(net, torch_path)
     mnn_name = convert2mnn(net, input_shape, fp, verbose=verbose)
     kwargs = dict()
-    kwargs["torch_name"] = net.__repr__()+'.pth'
+    kwargs["torch_name"] = net.__repr__() + '.pth'
     kwargs["input_shape"] = input_shape
     with open(os.path.join(fp, mnn_name[:-4] + "meta.json"), "w") as f:
         json.dump(kwargs, f)
@@ -126,9 +127,14 @@ def validation(fp, ops_path, verbose=False, save_path=None):
         import pandas as pd
         import numpy as np
         data = np.array(data)
-        pd.DataFrame({"model": data[:, 0], "latency_true(ms)": data[:, 1], "latency_pred(ms)": data[:, 2]}).to_csv(save_path)
+        pd.DataFrame({"model": data[:, 0], "latency_true(ms)": data[:, 1], "latency_pred(ms)": data[:, 2]}).to_csv(
+            save_path)
 
 
-
-
-
+def check_emb(model):
+    is_emb = False
+    for m in model.modules():
+        is_emb = isinstance(m, torch.nn.Embedding)
+        if is_emb:
+            return is_emb
+    return is_emb
