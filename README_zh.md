@@ -118,14 +118,18 @@ pred_latency = predict_latency(model, path, [1, 3, 224, 224], verbose=False)
 `path`为对应`meta_latency.pkl`的路径，注意输入的张量形状必须与之前在算子描述
 中设置的`input_shape`相同。
 
-## 3 如何检验MMT的预测误差
+## 4.更加精准的延迟预测方法
+通过测试少量模型在推理端的真实延迟与预测的延迟，`mmt`支持构建`机器学习模型`来更加准确的
+预测模型延迟。具体样例参考：
+
+## 5 如何检验MMT的预测误差
 具体参考[MobileNetV3测试](demo/MobileNetV3/tutorial.md)
 
 |Model|Num|err(%)|device|
 |----|----|----|----|
-|ResNet|6561|2.6%(3%)|  40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
-|
+|MobileNet|334|4.1%*(39%)| 40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz|
 
+(*表示使用机器学习方法优化的预测器误差(只采样16个网络用于训练))
 ### 开发日志 & 计划
 * 2022.5.1 框架设计
 * 2022.5.2 完成算子生成与测算

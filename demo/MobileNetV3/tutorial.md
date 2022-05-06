@@ -66,29 +66,25 @@ MobileNetV3143.pth                  MobileNetV31861-3-224-224.mnn       MobileNe
 MobileNetV3144.pth                  MobileNetV3186.pth                  MobileNetV3561-3-224-224meta.json   MobileNetV3981-3-224-224meta.json
 MobileNetV31451-3-224-224meta.json  MobileNetV31871-3-224-224meta.json  MobileNetV3561-3-224-224.mnn        MobileNetV3981-3-224-224.mnn
 ```
+Running `generate models.py` will generate two folders with a small number of models (for training) and a larger number of models (for validation).
 ## Step 4, Measure the latency of operators and models
 Just run these code at the inference device:
 ```python
 from mmt.meter import meter_ops, meter_models
 meter_ops("mbv3_ops")
-meter_models("mbv3")
+meter_models("mbv3_train")
+meter_models("mbv3_val")
 ```
+Running `measure.py`will measure the latency of operators and models.
 ## Step 5, Validate the error of prediction
 Just run these code at your server:
 ```python
 from mmt.converter import validation
-validation("mbv3", "mbv3_ops/meta_latency.pkl", save_path="error.txt")
+from mmt.predictor import latency_predictor
+validation("mbv3_train", "mbv3_ops/meta_latency.pkl", save_path="train_error.csv")
+lp = latency_predictor("mbv3_ops", "train_error.csv")
+validation("mbv3", "mbv3_ops/meta_latency.pkl", save_path="gp_error.csv", lp=lp)
+validation("mbv3", "mbv3_ops/meta_latency.pkl", save_path="error.csv")
 ```
-Then you will get:
-```
-model                 latency_true(ms)    latency_pred(ms)    error(ms)
-------------------  ------------------  ------------------  -----------
-MobileNetV3130.pth             3.7702              5.40697     1.63677
-MobileNetV342.pth              3.15617             4.43937     1.2832
-MobileNetV3188.pth             4.07167             4.67847     0.6068
-MobileNetV349.pth              3.7564              5.21857     1.46217
-MobileNetV3176.pth             3.25797             4.45497     1.197
-MobileNetV3179.pth             3.61677             5.43617     1.8194
-MobileNetV3167.pth             3.49303             4.92277     1.42973
-MobileNetV3152.pth             3.54577             5.03657     1.4908
-```
+Verify the error of the training set and save the results to `train_error.csv`, then train the machine learning model to build the delay predictor `lp`, 
+and then test the error of the direct prediction delay and the predictor based on the machine learning method on the validation set.

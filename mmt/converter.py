@@ -105,8 +105,11 @@ def export_models(net, input_shape, fp, verbose=False):
         json.dump(kwargs, f)
 
 
-def validation(fp, ops_path, verbose=False, save_path=None):
-    from .parser import predict_latency
+def validation(fp, ops_path, verbose=False, save_path=None, lp=None):
+    if lp is None:
+        from .parser import predict_latency
+    else:
+        predict_latency = lp
     headers = ["model", "latency_true(ms)", "latency_pred(ms)", "error(ms)"]
     data = []
     fnames = [x for x in os.listdir(fp) if x[-5:] == ".json"]
@@ -118,7 +121,7 @@ def validation(fp, ops_path, verbose=False, save_path=None):
             latency_t = kargs["latency"]["Avg"]
             input_shape = kargs["input_shape"]
             net = torch.load(os.path.join(fp, torch_name))
-            latency_p = predict_latency(net, ops_path, input_shape, verbose=verbose)
+            latency_p = predict_latency(net, ops_path, input_shape)
             if verbose:
                 logger.info("{}: latency: {} pred_latency: {}".format(torch_name, latency_t, latency_p))
             data.append([torch_name, latency_t, latency_p, latency_p - latency_t])

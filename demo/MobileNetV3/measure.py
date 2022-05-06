@@ -6,5 +6,6 @@ File:     measure.py.py
 """
 from mmt.meter import meter_ops, meter_models
 meter_ops("mbv3_ops")
-meter_models("mbv3")
+meter_models("mbv3_val")
+meter_models("mbv3_train")
 
