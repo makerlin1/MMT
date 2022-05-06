@@ -74,7 +74,7 @@ generate_ops_list("ops.yaml", "/path/ops_folder")
 与方式一高度类似，通过使用`mmt.register`函数直接注册并生成，且支持同类型算子多次注册以减少不必要的组合
 带来的冗余算子(方式一的缺点)，例如[样例](demo/MobileNetV3/convert.py)
 ```python
-from mmt import register
+from mmt.converter import register
 import torch.nn as nn
 fp = "./mbv3_ops"
 reg = lambda ops, **kwargs: register(ops, fp, **kwargs)
