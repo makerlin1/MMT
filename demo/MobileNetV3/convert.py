@@ -4,7 +4,7 @@ Time:     2022-05-04 22:23
 Author:   Haolin Yan(XiDian University)
 File:     convert.py
 """
-from mmt import register
+from mmt.converter import register
 import torch.nn as nn
 from mobilenetv3 import (conv_3x3_bn,
                          InvertedResidual,
