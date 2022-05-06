@@ -31,6 +31,7 @@ class ops_meta:
         else:
             model = self.classname()
         self.repr = model.__repr__()
+        delattr(self, 'classname')
         return model
 
     def record_mnn_fname(self, fname):
