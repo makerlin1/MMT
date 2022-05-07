@@ -176,4 +176,8 @@ Specific reference [MobileNetV3 test](demo/MobileNetV3/tutorial.md)
 
 |Model|Num|err(%)|device|
 |----|----|----|----|
-|MobileNet|334|4.1%*(39%)| 40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz|
+|MobileNet|334|4.1%| 40  Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz|
+|Models for UNSWNB-15|414|15%|openmesh|
+|Models for UNSWNB-15|414|11%|h3c|
+Models for UNSWNB-15|414|8%|edgecore|
+

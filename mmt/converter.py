@@ -55,6 +55,7 @@ def generate_ops_list(path, fp, verbose=False):
     success_ops = []
     for i, ops in enumerate(operator_list):
         module, input_shape = ops.return_instance(), ops.input_shape
+        ops.set_path = fp
         mnn_name = convert2mnn(module, input_shape, fp, verbose=verbose)
         if mnn_name != 0:
             ops.record_mnn_fname(mnn_name)
@@ -75,6 +76,7 @@ def register(ops, fp, **kwargs):
     success_ops = []
     for i, ops in enumerate(operator_list):
         module, input_shape = ops.return_instance(), ops.input_shape
+        ops.set_path = fp
         mnn_name = convert2mnn(module, input_shape, fp, verbose=False)
         if mnn_name != 0:
             ops.record_mnn_fname(mnn_name)

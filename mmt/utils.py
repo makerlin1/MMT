@@ -10,6 +10,12 @@ import pickle
 import os
 import json
 from .meter import get_latency
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class ops_meta:
     def __init__(self, classesname, input_shape, init_param=None):
@@ -21,6 +27,7 @@ class ops_meta:
         self.max = 0
         self.min = 0
         self.repr = ""
+        self.set_path = ""
 
     def __repr__(self):
         return self.repr
@@ -31,10 +38,15 @@ class ops_meta:
         else:
             model = self.classname()
         self.repr = model.__repr__()
-        delattr(self, 'classname')
         return model
 
     def record_mnn_fname(self, fname):
+        mnn2cls = fname
+        with open(os.path.join(self.set_path, mnn2cls+".pj"), 'wb') as f:
+            pickle.dump(self.classname, f)
+            logger.info("write %s" % mnn2cls+".pj")
+
+        delattr(self, 'classname')
         self.mnn_fname = fname
 
     def record_mnn_performance(self, result):
@@ -97,10 +109,13 @@ def replace(str):
 
 def parse_ops_info(path):
     ops_info_list = []
+    fp = os.path.dirname(path)
     with open(path, "rb") as f:
         ops_list = pickle.load(f)
         for ops in ops_list:
-            ops_info_list.append((ops.classname, ops.input_shape, ops.avg, ops.min, ops.max, ops.repr))
+            with open(os.path.join(fp, ops.mnn_fname + '.pj'), "rb") as f:
+                class_name = pickle.load(f)
+            ops_info_list.append((class_name, ops.input_shape, ops.avg, ops.min, ops.max, ops.repr))
     return ops_info_list
 
 
