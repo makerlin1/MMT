@@ -58,17 +58,19 @@ def predict_latency(module, ops_path, input_shape, verbose=False):
         return module
 
     module = search_ops(module, ops_list)
-    device = get_net_device(module)
+    # Move model to GPU
+    # If test model on cpu may get the "RuntimeError: std::bad_alloc"
+    module = module.cuda()
     module.eval()
-    x = torch.ones(input_shape).to(device)
+    x = torch.ones(input_shape).cuda()
     if check_emb(module):
         x = x.long()
-    _ = module(x)
+    with torch.no_grad():
+        _ = module(x)
     result.append(("Sum", "-", "-", latency_all[0]))
     if verbose:
         print(tabulate(result, headers=headers))
     return latency_all[0]
-
 
 
 def parse_kargs(module, param):

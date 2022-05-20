@@ -19,8 +19,8 @@ class latency_predictor:
         # self.gp = get_gp(X[:, None], y[:, None])
         self.gp = get_gp(y[:, None], X[:, None])
 
-    def __call__(self, model, ops_path, input_shape):
-        latency = np.array([predict_latency(model, ops_path, input_shape)])
+    def __call__(self, model, ops_path, input_shape, verbose=False):
+        latency = np.array([predict_latency(model, ops_path, input_shape, verbose=verbose)])
         y = self.gp.predict(latency[:, None])
         return y[0][0]
 
