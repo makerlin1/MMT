@@ -24,7 +24,7 @@ def get_latency(path, times=30, verbose=True):
     if verbose:
         print(lines)
     logger.info("%s:::%s" % (path, lines[-1]))
-    prefix = ["Avg", "Min", "Max"]
+    prefix = ["Avg", "OpSum", "Min", "Max"]
     result = dict((prefix[i], float(v)) for i, v in enumerate(re.findall(r"\d+\.?\d*", lines[-1])))
     result["repeat"] = times
     return result
